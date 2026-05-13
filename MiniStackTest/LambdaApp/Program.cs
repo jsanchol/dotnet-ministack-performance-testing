@@ -17,9 +17,10 @@ namespace LambdaApp
 
             List<Task> setupTasks = [];
 
+            var iterationCount = 0;
             while (iterations-- > 0)
             {
-                setupTasks.Add(testService.InvokeLambdaFunctionAsync());
+                setupTasks.Add(testService.InvokeLambdaFunctionAsync(iterationCount++));
             }
 
             await Task.WhenAll(setupTasks);

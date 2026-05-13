@@ -1,8 +1,6 @@
 using Infrastructure.Compute;
-using System.IO;
 using System.IO.Compression;
 using Amazon.Lambda;
-using Amazon.Lambda.Model;
 using Infrastructure.Observability;
 
 namespace Application.Services
@@ -31,11 +29,12 @@ namespace Application.Services
             await CreateFunctionAsync(functionName, zipFile, DefaultHandler, DefaultRuntime, DefaultLambdaRole);
         }
 
-        public async Task InvokeLambdaFunctionAsync(string functionName = DefaultLambdaFunctionName)
+        public async Task InvokeLambdaFunctionAsync(int iteration, string functionName = DefaultLambdaFunctionName)
         {
-            string payload = "{ \"message\": \"Hello from LambdaApp\" }";
-            Console.WriteLine($"Invoking lambda function '{functionName}'...");
-            await InvokeAsync(functionName, payload);
+            string payload = "{ \"message\": \"Hello from LambdaApp"+ iteration + "\" }";
+            Console.WriteLine($"Invoking lambda function '{functionName}'... Iteration: {iteration}");
+            var result = await InvokeAsync(functionName, payload);
+            Console.WriteLine($"Lambda iteration '{iteration}' invoked successfully. Result: {result}");
         }
 
         private byte[] CreateLambdaZipPackage()

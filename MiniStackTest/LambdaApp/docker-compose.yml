@@ -4,7 +4,7 @@ services:
     ports:
       - "4566:4566"
     environment:
-      SERVICES: dynamodb, logs, cloudwatch
+      SERVICES: dynamodb, logs, cloudwatch, lambda
     volumes:
       - ministack-data:/tmp/ministack-data
 
@@ -19,9 +19,10 @@ services:
       AWS_SECRET_ACCESS_KEY: test
       AWS_DEFAULT_REGION: us-east-1
       LAMBDA_ENDPOINT: http://ministack:4566
+      CLOUDWATCH_ENDPOINT: http://ministack:4566
       TEST_ITERATIONS: 10
 
-testing-cloudwatch-service:
+  testing-cloudwatch-service:
     build:
       context: ..
       dockerfile: ./CloudWatchApp/Dockerfile

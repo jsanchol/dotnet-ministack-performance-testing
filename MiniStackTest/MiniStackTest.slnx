@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="docker-compose.yml" />
+  </Folder>
+  <Project Path="Application/Application.csproj" />
+  <Project Path="CloudWatchApp/CloudWatchApp.csproj" />
+  <Project Path="Domain/Domain.csproj" />
+  <Project Path="DynamoDbApp/DynamoDbApp.csproj" />
+  <Project Path="Infrastructure/Infrastructure.csproj" />
+</Solution>

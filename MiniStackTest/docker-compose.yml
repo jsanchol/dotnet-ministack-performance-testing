@@ -1,0 +1,37 @@
+services:
+  ministack:
+    image: ministackorg/ministack:latest
+    ports:
+      - "4566:4566"
+    environment:
+      SERVICES: dynamodb, logs, cloudwatch
+    volumes:
+      - ministack-data:/tmp/ministack-data
+
+  testing-dynamodb-service:
+    build:
+      context: .
+      dockerfile: ./DynamoDbApp/Dockerfile
+    depends_on:
+      - ministack
+    environment:
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      AWS_DEFAULT_REGION: us-east-1
+      DYNAMODB_ENDPOINT: http://ministack:4566
+      DYNAMODB_RESET: true
+      TEST_ITERATIONS: 1
+  testing-cloudwatch-service:
+    build:
+      context: .
+      dockerfile: ./CloudWatchApp/Dockerfile
+    depends_on:
+      - ministack
+    environment:
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      AWS_DEFAULT_REGION: us-east-1
+      CLOUDWATCH_ENDPOINT: http://ministack:4566
+
+volumes:
+  ministack-data:

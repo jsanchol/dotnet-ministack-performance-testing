@@ -13,6 +13,7 @@
   <ItemGroup>
     <PackageReference Include="AWSSDK.DynamoDBv2" Version="4.0.18.1" />
     <PackageReference Include="AWSSDK.CloudWatch" Version="4.0.10.1" />
+    <PackageReference Include="AWSSDK.Lambda" Version="4.0.0.0" />
     <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="4.0.3.36" />
   </ItemGroup>
 

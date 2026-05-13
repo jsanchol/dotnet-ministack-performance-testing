@@ -6,5 +6,6 @@
   <Project Path="CloudWatchApp/CloudWatchApp.csproj" />
   <Project Path="Domain/Domain.csproj" />
   <Project Path="DynamoDbApp/DynamoDbApp.csproj" />
+  <Project Path="LambdaApp/LambdaApp.csproj" />
   <Project Path="Infrastructure/Infrastructure.csproj" />
 </Solution>

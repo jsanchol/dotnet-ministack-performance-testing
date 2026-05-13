@@ -30,7 +30,9 @@ namespace Application.Services
             var tasks = new List<Task>
             {
                 // Monitor RCUs and WCUs in the background while running tests
+                #if DEBUG
                 MonitorTableAsync(tableName, cancellationToken),
+                #endif
                 // GSI+Provisioned throughput with partition key only (no sort key) to test performance of queries on GSI without sort key
                 RunIncrementalTestGSIAsync(tableName, cancellationTokenSource)
             };
@@ -50,7 +52,9 @@ namespace Application.Services
             var tasks = new List<Task>
             {
                 // Monitor RCUs and WCUs in the background while running tests
+                #if DEBUG
                 MonitorTableAsync(tableName, cancellationToken),
+                #endif
                 // GSI+On-Demand throughput with partition key only (no sort key) to test performance of queries on GSI without sort key
                 RunIncrementalTestGSIAsync(tableName, cancellationTokenSource)
             };

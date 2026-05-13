@@ -18,6 +18,7 @@ services:
       AWS_ACCESS_KEY_ID: test
       AWS_SECRET_ACCESS_KEY: test
       AWS_DEFAULT_REGION: us-east-1
+      CLOUDWATCH_ENDPOINT: http://ministack:4566
       DYNAMODB_ENDPOINT: http://ministack:4566
       DYNAMODB_RESET: true
       TEST_ITERATIONS: 1

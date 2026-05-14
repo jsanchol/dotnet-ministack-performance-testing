@@ -9,7 +9,8 @@ namespace Infrastructure.Compute
 {
     public class TestingLambdaClient
     {
-        private const string MetricNamespace = "MiniStack/AWS/Lambda";
+        private const string SuccessMetricName = "LambdaInvocationSuccess";
+        private const string FailureMetricName = "LambdaInvocationFailure";
         public AmazonLambdaClient client;
         public string endpoint;
         private string AccessKey;
@@ -87,6 +88,7 @@ namespace Infrastructure.Compute
 
         public async Task<string> InvokeAsync(string functionName, string payload)
         {
+            var stopWatch = System.Diagnostics.Stopwatch.StartNew();
             try
             {
                 var request = new InvokeRequest
@@ -99,12 +101,14 @@ namespace Infrastructure.Compute
                 var response = await client.InvokeAsync(request);
                 using var reader = new StreamReader(response.Payload);
                 string output = await reader.ReadToEndAsync();
-                await cloudWatchClient.PublishCloudWatchMetricAsync("LambdaInvocationSuccess", 1, functionName, "Invoke", StandardUnit.Count, MetricNamespace);
+                stopWatch.Stop();
+                await cloudWatchClient.PublishCloudWatchMetricAsync(SuccessMetricName, stopWatch.ElapsedMilliseconds, functionName, "Invoke", StandardUnit.Milliseconds, TestingCloudWatchClient.LambdaMetricNamespace);
                 return output;
             }
             catch (Exception ex)
             {
-                await cloudWatchClient.PublishCloudWatchMetricAsync("LambdaInvocationFailure", 1, functionName, "Invoke", StandardUnit.Count, MetricNamespace);
+                stopWatch.Stop();
+                await cloudWatchClient.PublishCloudWatchMetricAsync(FailureMetricName, stopWatch.ElapsedMilliseconds, functionName, "Invoke", StandardUnit.Milliseconds, TestingCloudWatchClient.LambdaMetricNamespace);
                 return $"Lambda invocation failed: {ex.Message}";
             }
         }

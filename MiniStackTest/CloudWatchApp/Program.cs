@@ -16,18 +16,18 @@ namespace CloudWatchApp
 
             while (DateTime.UtcNow < endTime)
             {
+                Console.WriteLine("=".PadRight(80, '='));
                 Console.WriteLine($"Starting cycle {cycle} at {DateTime.UtcNow:yyyy-MM-dd HH:mm:ss} UTC");
 
-                await testService.ReadDynamoDBMetricsAsync("TestTableGSIProvisioned");
-                Console.WriteLine("\n" + new string('-', 80) + "\n");
-                await testService.ReadDynamoDBMetricsAsync("TestTableGSIOnDemand");
-
+                await testService.PrintPublishedMetricsAsync();
+                
                 cycle++;
                 if (DateTime.UtcNow < endTime)
                 {
                     TimeSpan remaining = endTime - DateTime.UtcNow;
                     TimeSpan delay = remaining < TimeSpan.FromMinutes(1) ? remaining : TimeSpan.FromMinutes(1);
-                    Console.WriteLine($"Waiting {delay.TotalSeconds:N0} seconds before next cycle...\n");
+                    Console.WriteLine($"Waiting {delay.TotalSeconds:N0} seconds before next cycle...");
+                    Console.WriteLine(new string('-', 80) + "\n");
                     await Task.Delay(delay);
                 }
             }

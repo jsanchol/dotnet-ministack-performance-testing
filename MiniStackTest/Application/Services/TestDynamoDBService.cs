@@ -158,7 +158,7 @@ namespace Application.Services
             var queryResponse = await client.QueryAsync(queryRequest);
             stopwatch.Stop();
             Console.WriteLine($"PK Query 10% of items, time: {stopwatch.ElapsedMilliseconds} ms, Items: {queryResponse.Items.Count}");
-            await cloudWatchClient.PublishCloudWatchMetricAsync(TestingCloudWatchClient.QueryMetric, queryResponse.Items.Count, tableName, "Query");
+            await cloudWatchClient.PublishCloudWatchMetricAsync(TestingCloudWatchClient.QueryMetric, queryResponse.Items.Count, tableName, "Query", TestingCloudWatchClient.DynamoDBNamespace);
 
             // Query on GSI
             var gsiQueryRequest = new QueryRequest
@@ -175,7 +175,7 @@ namespace Application.Services
             stopwatch.Restart();
             var gsiQueryResponse = await client.QueryAsync(gsiQueryRequest);
             stopwatch.Stop();
-            await cloudWatchClient.PublishCloudWatchMetricAsync(TestingCloudWatchClient.QueryMetric, gsiQueryResponse.Items.Count, tableName, "GSIQuery");
+            await cloudWatchClient.PublishCloudWatchMetricAsync(TestingCloudWatchClient.QueryMetric, gsiQueryResponse.Items.Count, tableName, "GSIQuery", TestingCloudWatchClient.DynamoDBNamespace);
             Console.WriteLine($"Finished GSI Query 20% of items, time: {stopwatch.ElapsedMilliseconds} ms, Items: {gsiQueryResponse.Items.Count}");
         }
 
@@ -192,7 +192,7 @@ namespace Application.Services
             stopwatch.Restart();
             var scanResponse = await client.ScanAsync(scanRequest);
             stopwatch.Stop();
-            await cloudWatchClient.PublishCloudWatchMetricAsync(TestingCloudWatchClient.ScanMetric, scanResponse.Items.Count, tableName, "Scan");
+            await cloudWatchClient.PublishCloudWatchMetricAsync(TestingCloudWatchClient.ScanMetric, scanResponse.Items.Count, tableName, "Scan", TestingCloudWatchClient.DynamoDBNamespace);
             Console.WriteLine($"Finished Scan 100% items, time: {stopwatch.ElapsedMilliseconds} ms, Items: {scanResponse.Items.Count}");
         }
 
@@ -230,7 +230,7 @@ namespace Application.Services
                 totalItems += queryResponse.Items.Count;
                 lastEvaluatedKey = queryResponse.LastEvaluatedKey != null && queryResponse.LastEvaluatedKey.ContainsKey("SK") ? queryResponse.LastEvaluatedKey["SK"].S : null;
             } while (lastEvaluatedKey != null);
-            await cloudWatchClient.PublishCloudWatchMetricAsync(TestingCloudWatchClient.PaginationQueryMetric, totalItems, tableName, "PaginationQuery");
+            await cloudWatchClient.PublishCloudWatchMetricAsync(TestingCloudWatchClient.PaginationQueryMetric, totalItems, tableName, "PaginationQuery", TestingCloudWatchClient.DynamoDBNamespace);
             stopwatch.Stop();
             Console.WriteLine($"Finished pagination query 10% of items by 100 Limit, time: {stopwatch.ElapsedMilliseconds} ms, Total items retrieved: {totalItems}");
         }

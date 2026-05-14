@@ -11,6 +11,10 @@ namespace Infrastructure.Observability
         private string AccessKey;
         private string SecretKey;
 
+        private const string CloudWatchMetricNamespace = "MiniStack/AWS/CloudWatch";
+        public const string CloudWatchMetricFetchFailureMetric = "CloudWatchMetricFetchFailure";
+
+        // DynamoDB Metrics
         public const string DynamoDBNamespace = "MiniStack/AWS/DynamoDB";
         public const string ConsumedRCUMetric = "ConsumedReadCapacityUnits";
         public const string ConsumedWCUMetric = "ConsumedWriteCapacityUnits";
@@ -23,8 +27,10 @@ namespace Infrastructure.Observability
         public const string DynamoDBTableCreateMetric = "DynamoDBTableCreateDurationMs";
         public const string DynamoDBTableCreateFailureMetric = "DynamoDBTableCreateFailure";
         public const string DynamoDBTestDataInsertDurationMsMetric = "DynamoDBTestDataInsertDurationMs";
-        public const string CloudWatchMetricFetchFailureMetric = "CloudWatchMetricFetchFailure";
         public const string PaginationQueryMetric = "PaginationQueryCount";
+
+        // Lambda Metrics
+        public const string LambdaMetricNamespace = "MiniStack/AWS/Lambda";
 
         public TestingCloudWatchClient()
         {
@@ -46,7 +52,7 @@ namespace Infrastructure.Observability
             return new AmazonCloudWatchClient(basicCredentials, cloudWatchConfig);
         }
 
-        public async Task GetMetricAsync(string tableName, string metricName, DateTime startTime, DateTime endTime)
+        protected async Task GetMetricAsync(string tableName, string metricName, DateTime startTime, DateTime endTime)
         {
             try
             {
@@ -94,15 +100,15 @@ namespace Infrastructure.Observability
             }
             catch (Exception ex)
             {
-                await PublishCloudWatchMetricAsync(CloudWatchMetricFetchFailureMetric, 1, tableName, metricName);
+                await PublishCloudWatchMetricAsync(CloudWatchMetricFetchFailureMetric, 1, tableName, metricName, CloudWatchMetricNamespace);
                 Console.WriteLine($"\n{metricName}: Error retrieving metrics - {ex.Message}");
             }
         }
 
-        public Task PublishCloudWatchMetricAsync(string metricName, double value, string tableName, string operation)
-            => PublishCloudWatchMetricAsync(metricName, value, tableName, operation, StandardUnit.Milliseconds);
+        public Task PublishCloudWatchMetricAsync(string metricName, double value, string tableName, string operation, string metricNamespace)
+            => PublishCloudWatchMetricAsync(metricName, value, tableName, operation, StandardUnit.Milliseconds, metricNamespace);
 
-        public async Task PublishCloudWatchMetricAsync(string metricName, double value, string tableName, string operation, StandardUnit unit)
+        public async Task PublishCloudWatchMetricAsync(string metricName, double value, string tableName, string operation, StandardUnit unit, string metricNamespace)
         {
             try
             {
@@ -121,7 +127,7 @@ namespace Infrastructure.Observability
 
                 var request = new PutMetricDataRequest
                 {
-                    Namespace = DynamoDBNamespace,
+                    Namespace = metricNamespace,
                     MetricData = new List<MetricDatum> { metricDatum }
                 };
 

@@ -100,14 +100,18 @@ namespace Infrastructure.Persistence
                 await client.CreateTableAsync(request);
                 stopwatch.Stop();
                 Console.WriteLine("Table created successfully.");
-                await cloudWatchClient.PublishCloudWatchMetricAsync(TestingCloudWatchClient.DynamoDBTableCreateSuccessMetric, 1, tableName, "GSIProvisioned", StandardUnit.Count);
-                await cloudWatchClient.PublishCloudWatchMetricAsync(TestingCloudWatchClient.DynamoDBTableCreateMetric, stopwatch.Elapsed.TotalMilliseconds, tableName, "GSIProvisioned");
+                await cloudWatchClient.PublishCloudWatchMetricAsync(TestingCloudWatchClient.DynamoDBTableCreateSuccessMetric, 1, tableName, "GSIProvisioned", StandardUnit.Count, TestingCloudWatchClient.DynamoDBNamespace);
+                await cloudWatchClient.PublishCloudWatchMetricAsync(TestingCloudWatchClient.DynamoDBTableCreateMetric, stopwatch.Elapsed.TotalMilliseconds, tableName, "GSIProvisioned", TestingCloudWatchClient.DynamoDBNamespace);
             }
             catch (Exception ex)
             {
                 stopwatch.Stop();
                 await cloudWatchClient.PublishCloudWatchMetricAsync(TestingCloudWatchClient.DynamoDBTableCreateFailureMetric, 1, tableName, "GSIProvisioned", StandardUnit.Count);
                 await cloudWatchClient.PublishCloudWatchMetricAsync(TestingCloudWatchClient.DynamoDBTableCreateMetric, stopwatch.Elapsed.TotalMilliseconds, tableName, "GSIProvisioned");
+
+                Console.WriteLine($"Existing tables: {string.Join(", ", createdTables.Table.TableName)}");
+                await cloudWatchClient.PublishCloudWatchMetricAsync(TestingCloudWatchClient.DynamoDBTableCreateFailureMetric, 1, tableName, "GSIProvisioned", StandardUnit.Count, TestingCloudWatchClient.DynamoDBNamespace);
+                await cloudWatchClient.PublishCloudWatchMetricAsync(TestingCloudWatchClient.DynamoDBTableCreateMetric, stopwatch.Elapsed.TotalMilliseconds, tableName, "GSIProvisioned", TestingCloudWatchClient.DynamoDBNamespace);
                 Console.WriteLine($"Table creation failed: {ex.Message}");
             }
 
@@ -132,7 +136,7 @@ namespace Infrastructure.Persistence
                 await client.PutItemAsync(tableName, item);
             }
             stopwatch.Stop();
-            await cloudWatchClient.PublishCloudWatchMetricAsync(TestingCloudWatchClient.DynamoDBTestDataInsertDurationMsMetric, stopwatch.Elapsed.TotalMilliseconds, tableName, "PutSmallItemTestData");
+            await cloudWatchClient.PublishCloudWatchMetricAsync(TestingCloudWatchClient.DynamoDBTestDataInsertDurationMsMetric, stopwatch.Elapsed.TotalMilliseconds, tableName, "PutSmallItemTestData", TestingCloudWatchClient.DynamoDBNamespace);
             Console.WriteLine($"Test data inserted: {sampleNumber} items in {stopwatch.ElapsedMilliseconds} ms.");
         }
 
@@ -158,7 +162,7 @@ namespace Infrastructure.Persistence
                 await client.PutItemAsync(tableName, item);
             }
             stopwatch.Stop();
-            await cloudWatchClient.PublishCloudWatchMetricAsync(TestingCloudWatchClient.DynamoDBTestDataInsertDurationMsMetric, stopwatch.Elapsed.TotalMilliseconds, tableName, "PutLargeItemTestData");
+            await cloudWatchClient.PublishCloudWatchMetricAsync(TestingCloudWatchClient.DynamoDBTestDataInsertDurationMsMetric, stopwatch.Elapsed.TotalMilliseconds, tableName, "PutLargeItemTestData", TestingCloudWatchClient.DynamoDBNamespace);
             Console.WriteLine($"Test data inserted: {sampleNumber} items in {stopwatch.ElapsedMilliseconds} ms (with random 1-10KB large data per item).");
         }
 
@@ -225,14 +229,14 @@ namespace Infrastructure.Persistence
                 await client.CreateTableAsync(request);
                 stopwatch.Stop();
                 Console.WriteLine("Table created successfully.");
-                await cloudWatchClient.PublishCloudWatchMetricAsync(TestingCloudWatchClient.DynamoDBTableCreateSuccessMetric, 1, tableName, "GSIOnDemand", StandardUnit.Count);
-                await cloudWatchClient.PublishCloudWatchMetricAsync(TestingCloudWatchClient.DynamoDBTableCreateMetric, stopwatch.Elapsed.TotalMilliseconds, tableName, "GSIOnDemand");
+                await cloudWatchClient.PublishCloudWatchMetricAsync(TestingCloudWatchClient.DynamoDBTableCreateSuccessMetric, 1, tableName, "GSIOnDemand", StandardUnit.Count, TestingCloudWatchClient.DynamoDBNamespace);
+                await cloudWatchClient.PublishCloudWatchMetricAsync(TestingCloudWatchClient.DynamoDBTableCreateMetric, stopwatch.Elapsed.TotalMilliseconds, tableName, "GSIOnDemand", TestingCloudWatchClient.DynamoDBNamespace);
             }
             catch (Exception ex)
             {
                 stopwatch.Stop();
-                await cloudWatchClient.PublishCloudWatchMetricAsync(TestingCloudWatchClient.DynamoDBTableCreateFailureMetric, 1, tableName, "GSIOnDemand", StandardUnit.Count);
-                await cloudWatchClient.PublishCloudWatchMetricAsync(TestingCloudWatchClient.DynamoDBTableCreateMetric, stopwatch.Elapsed.TotalMilliseconds, tableName, "GSIOnDemand");
+                await cloudWatchClient.PublishCloudWatchMetricAsync(TestingCloudWatchClient.DynamoDBTableCreateFailureMetric, 1, tableName, "GSIOnDemand", StandardUnit.Count, TestingCloudWatchClient.DynamoDBNamespace);
+                await cloudWatchClient.PublishCloudWatchMetricAsync(TestingCloudWatchClient.DynamoDBTableCreateMetric, stopwatch.Elapsed.TotalMilliseconds, tableName, "GSIOnDemand", TestingCloudWatchClient.DynamoDBNamespace);
                 Console.WriteLine($"Table creation failed: {ex.Message}");
             }
         }

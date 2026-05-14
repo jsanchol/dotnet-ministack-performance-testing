@@ -61,11 +61,12 @@ namespace Infrastructure.Persistence
             Console.WriteLine("Table is active.");
         }
 
-        public async Task CreateGSIProvisionedTableAsync(string tableName)
+        public CreateTableRequest BuildCreateTableRequestForTestItem(string tableName, bool payPerRequest = false)
         {
             var request = new CreateTableRequest
             {
                 TableName = tableName,
+                BillingMode = payPerRequest ? BillingMode.PAY_PER_REQUEST : BillingMode.PROVISIONED,
                 KeySchema = new List<KeySchemaElement>
                 {
                     new KeySchemaElement { AttributeName = "PK", KeyType = KeyType.HASH },
@@ -87,11 +88,22 @@ namespace Infrastructure.Persistence
                             new KeySchemaElement { AttributeName = "GSI_PK", KeyType = KeyType.HASH }
                         },
                         Projection = new Projection { ProjectionType = "ALL" },
-                        ProvisionedThroughput = new ProvisionedThroughput { ReadCapacityUnits = 5, WriteCapacityUnits = 5 }
+                        ProvisionedThroughput = payPerRequest ? null : new ProvisionedThroughput { ReadCapacityUnits = 5, WriteCapacityUnits = 5 }
                     }
-                },
-                ProvisionedThroughput = new ProvisionedThroughput { ReadCapacityUnits = 5, WriteCapacityUnits = 5 }
+                }
             };
+
+            if (!payPerRequest)
+            {
+                request.ProvisionedThroughput = new ProvisionedThroughput { ReadCapacityUnits = 5, WriteCapacityUnits = 5 };
+            }
+
+            return request;
+        }
+
+        public async Task CreateGSIProvisionedTableAsync(string tableName)
+        {
+            var request = BuildCreateTableRequestForTestItem(tableName);
 
             var stopwatch = Stopwatch.StartNew();
             try
@@ -106,8 +118,8 @@ namespace Infrastructure.Persistence
             catch (Exception ex)
             {
                 stopwatch.Stop();
-                await cloudWatchClient.PublishCloudWatchMetricAsync(TestingCloudWatchClient.DynamoDBTableCreateFailureMetric, 1, tableName, "GSIProvisioned", StandardUnit.Count);
-                await cloudWatchClient.PublishCloudWatchMetricAsync(TestingCloudWatchClient.DynamoDBTableCreateMetric, stopwatch.Elapsed.TotalMilliseconds, tableName, "GSIProvisioned");
+                var describeTableRequest = new DescribeTableRequest { TableName = tableName };
+                var createdTables = await client.DescribeTableAsync(describeTableRequest);
 
                 Console.WriteLine($"Existing tables: {string.Join(", ", createdTables.Table.TableName)}");
                 await cloudWatchClient.PublishCloudWatchMetricAsync(TestingCloudWatchClient.DynamoDBTableCreateFailureMetric, 1, tableName, "GSIProvisioned", StandardUnit.Count, TestingCloudWatchClient.DynamoDBNamespace);
@@ -193,35 +205,7 @@ namespace Infrastructure.Persistence
         public async Task CreateGSIOnDemandTableAsync(string tableName)
         {
             var stopwatch = Stopwatch.StartNew();
-            var request = new CreateTableRequest
-            {
-                TableName = tableName,
-                BillingMode = BillingMode.PAY_PER_REQUEST,
-                KeySchema = new List<KeySchemaElement>
-                {
-                    new KeySchemaElement { AttributeName = "PK", KeyType = "HASH" },
-                    new KeySchemaElement { AttributeName = "SK", KeyType = "RANGE" }
-                },
-                AttributeDefinitions = new List<AttributeDefinition>
-                {
-                    new AttributeDefinition { AttributeName = "PK", AttributeType = "S" },
-                    new AttributeDefinition { AttributeName = "SK", AttributeType = "S" },
-                    new AttributeDefinition { AttributeName = "GSI_PK", AttributeType = "S" }
-                },
-                GlobalSecondaryIndexes = new List<GlobalSecondaryIndex>
-                {
-                    new GlobalSecondaryIndex
-                    {
-                        IndexName = "GSI1",
-                        KeySchema = new List<KeySchemaElement>
-                        {
-                            new KeySchemaElement { AttributeName = "GSI_PK", KeyType = "HASH" }
-                        },
-                        Projection = new Projection { ProjectionType = "ALL" }
-                        // No ProvisionedThroughput needed for PAY_PER_REQUEST
-                    }
-                }
-            };
+            var request = BuildCreateTableRequestForTestItem(tableName, payPerRequest: true);
 
             try
             {

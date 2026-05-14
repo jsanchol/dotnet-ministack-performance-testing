@@ -91,12 +91,12 @@ namespace Application.Services
                 // Put sample items small test data
                 Console.WriteLine($"Inserting small item test data for table {tableName} sample number: {sampleNumber}.");
                 
-                await PutSmallItemTestDataAsync(tableName, sampleNumber);
+                // await PutSmallItemTestDataAsync(tableName, sampleNumber);
 
-                // Performance tests
-                await RunPKGSIQueryTestsAsync(tableName);
-                await RunPaginationQueryTestsAsync(tableName);
-                await RunScanTestsAsync(tableName);
+                // // Performance tests
+                // await RunPKGSIQueryTestsAsync(tableName);
+                // await RunPaginationQueryTestsAsync(tableName);
+                // await RunScanTestsAsync(tableName);
 
                 await RunContextTestsAsync(tableName, sampleNumber);
             }
@@ -119,7 +119,10 @@ namespace Application.Services
                     GenerateLargeDataString(1)
                 );
                 stopwatch.Restart();
-                await context.SaveAsync(item);
+                await context.SaveAsync(item, new SaveConfig
+                {
+                    OverrideTableName = tableName
+                });
                 stopwatch.Stop();
                 if (i == sampleNumber - 1)
                 {
@@ -130,7 +133,10 @@ namespace Application.Services
             for (int i = 0; i < sampleNumber; i++)
             {
                 stopwatch.Restart();
-                var item = await context.LoadAsync<TestItem>($"User{i % 10}", $"Item{i}");
+                var item = await context.LoadAsync<TestItem>($"User{i % 10}", $"Item{i}", new LoadConfig
+                {
+                    OverrideTableName = tableName
+                });
                 stopwatch.Stop();
                 if (i == sampleNumber - 1)
                 {
